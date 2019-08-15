@@ -23,7 +23,7 @@ export class RecipesService {
   constructor() {}
 
   getAllRecipes() {
-    return this.recipes;
+    return [...this.recipes];
   }
 
   getRecipe(recipeId: string) {
@@ -33,4 +33,11 @@ export class RecipesService {
       })
     };
   }
+
+  deleteRecipe(recipeId: string){
+    this.recipes = this.recipes.filter(recipe => {
+      return recipeId!==recipe.id;
+    })
+  }
+
 }

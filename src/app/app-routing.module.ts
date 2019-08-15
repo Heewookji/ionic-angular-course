@@ -16,7 +16,7 @@ const routes: Routes = [
           "./recipes/recipe-detail/recipe-detail.module#RecipeDetailPageModule"
       }
     ]
-  }
+  },
 ];
 
 @NgModule({
