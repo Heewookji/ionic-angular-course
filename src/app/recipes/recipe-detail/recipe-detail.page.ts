@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { RecipesService } from "../recipes.service";
 import { Recipe } from "../recipe.model";
 import { AlertController } from "@ionic/angular";
+import { ConsoleReporter } from 'jasmine';
 
 @Component({
   selector: "app-recipe-detail",
@@ -20,6 +21,7 @@ export class RecipeDetailPage implements OnInit {
   ) {}
 
   ngOnInit() {
+    console.log('ngOnInit');
     this.activatedRoute.paramMap.subscribe(paramMap => {
       if (!paramMap.has("recipeId")) {
         this.router.navigate(["/recipes"]);
@@ -28,6 +30,26 @@ export class RecipeDetailPage implements OnInit {
       const recipeId = paramMap.get("recipeId");
       this.recipe = this.recipeService.getRecipe(recipeId);
     });
+  }
+
+  ionViewWillEnter(){
+    console.log('ionViewWillEnter ');
+  }
+
+  ionViewDidEnter(){
+    console.log('ionViewDidEnter');
+  }
+
+  ionViewWillLeave(){
+    console.log('ionViewWillLeave');
+  }
+
+  ionViewDidLeave(){
+    console.log('ionViewDidLeave');
+  }
+  
+  ngOnDestroy() {
+    console.log('ngOnDestroy');
   }
 
   onDeleteRecipe() {
