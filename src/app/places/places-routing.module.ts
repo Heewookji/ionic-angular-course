@@ -16,7 +16,7 @@ const routes: Routes = [
                         loadChildren: './discover/discover.module#DiscoverPageModule'
                     },
                     {
-                        path: 'placeId',
+                        path: ':placeId',
                         loadChildren: './discover/place-detail/place-detail.module#PlaceDetailPageModule' 
                     }
                 ]
@@ -28,6 +28,18 @@ const routes: Routes = [
                         path: '',
                         loadChildren: './offers/offers.module#OffersPageModule'
                     },
+                    {
+                        path: 'new',
+                        loadChildren: './offers/new-offer/new-offer.module#NewOfferPageModule'
+                    },
+                    {
+                        path: 'edit/:placeId',
+                        loadChildren: './offers/edit-offer/edit-offer.module#EditOfferPageModule'
+                    },
+                    {
+                        path: ':placeId',
+                        loadChildren: './offers/offer-booking/offer-booking.module#OfferBookingPageModule'
+                    }
                 ]
             },
             {
