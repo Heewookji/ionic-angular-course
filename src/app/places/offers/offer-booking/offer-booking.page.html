@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>offer-booking</ion-title>
+    <ion-title>{{ offer.title }}</ion-title>
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/places/tabs/offers"></ion-back-button>
     </ion-buttons>
@@ -8,8 +8,6 @@
 </ion-header>
 
 <ion-content>
-<ion-button color="primary" margin
-(click)="onBookOffer()">
-  book
-</ion-button>
+  <ion-button margin color="primary" [routerLink]="['/','places','tabs','offers','edit',offer.id]">
+ Edit</ion-button>
 </ion-content>

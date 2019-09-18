@@ -1,24 +1,31 @@
-import { Component, OnInit } from '@angular/core';
-import { NavController } from '@ionic/angular';
-import { Router } from '@angular/router';
+import { Component, OnInit } from "@angular/core";
+import { NavController } from "@ionic/angular";
+import { ActivatedRoute } from "@angular/router";
+import { PlacesService } from "../../places.service";
+import { Offer } from '../offer.model';
 
 @Component({
-  selector: 'app-offer-booking',
-  templateUrl: './offer-booking.page.html',
-  styleUrls: ['./offer-booking.page.scss'],
+  selector: "app-offer-booking",
+  templateUrl: "./offer-booking.page.html",
+  styleUrls: ["./offer-booking.page.scss"]
 })
 export class OfferBookingPage implements OnInit {
 
-  constructor(private router: Router, private navCtrl: NavController) { }
+  offer: Offer
+
+  constructor(
+    private route: ActivatedRoute,
+    private navCtrl: NavController,
+    private placesService: PlacesService
+  ) {}
 
   ngOnInit() {
+    this.route.paramMap.subscribe(paramMap => {
+      if (!paramMap.has("placeId")) {
+        this.navCtrl.navigateBack("/places/tabs/offers");
+        return;
+      }
+     this.offer = this.placesService.getOffer(paramMap.get('placeId') );
+    });
   }
-
-
-  onBookOffer(){
-    // this.router.navigateByUrl('/places/tabs/discover');
-    this.navCtrl.navigateBack('/places/tabs/offers');
-    // this.navCtrl.pop();
-  }
-
 }
