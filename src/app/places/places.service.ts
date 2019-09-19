@@ -70,6 +70,14 @@ export class PlacesService {
       })
     };
   }
+   
+  getPlace(id: string) {
+    return {
+      ...this._places.find(place => {
+        return place.id == id;
+      })
+    };
+  }
 
   constructor() {}
 }
