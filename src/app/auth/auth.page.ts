@@ -1,22 +1,35 @@
-import { Component, OnInit } from '@angular/core';
-import { AuthService } from './auth.service';
-import { Router } from '@angular/router';
+import { Component, OnInit } from "@angular/core";
+import { AuthService } from "./auth.service";
+import { Router } from "@angular/router";
+import { LoadingController } from "@ionic/angular";
 
 @Component({
-  selector: 'app-auth',
-  templateUrl: './auth.page.html',
-  styleUrls: ['./auth.page.scss'],
+  selector: "app-auth",
+  templateUrl: "./auth.page.html",
+  styleUrls: ["./auth.page.scss"]
 })
 export class AuthPage implements OnInit {
+  isLoading = false;
 
-  constructor(private authService: AuthService, private router: Router) { }
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private loadingCtrl: LoadingController
+  ) {}
 
-  ngOnInit() {
+  ngOnInit() {}
+
+  onLogin() {
+    this.isLoading = true;
+    this.loadingCtrl.create({ message: "Logging in..", keyboardClose: true})
+    .then(loadingEl => {
+      loadingEl.present();
+      this.authService.logIn();
+      setTimeout(() => {
+        this.isLoading = false;
+        loadingEl.dismiss();
+        this.router.navigateByUrl("places/tabs/discover");
+      }, 1500);
+    });
   }
-
-  onLogin(){
-    this.authService.logIn();
-    this.router.navigateByUrl("places/tabs/discover");
-  }
-
 }
