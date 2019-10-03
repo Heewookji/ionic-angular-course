@@ -37,21 +37,27 @@ export class PlacesService {
       "seoul",
       "seoul place",
       "https://www.jetstar.com/_/media/inspiration-hub/article-images/19apr/south-korea-best-of-seoul-by-subway/seoulherocrop.jpg?rev=9c1de2b0c9294d71a43d01a7118360bd&w=1050&rc=1&cw=1050&ch=590&cx=55&cy=0&hash=D4FF57A7F356187D34BF3E524904D495F3454ED0",
-      15
+      15,
+      new Date('2019-01-01'),
+      new Date('2019-12-31')
     ),
     new Place(
       "p2",
       "dangsan",
       "dangsan place",
       "http://smart80.kr/images/folk/folk_/folk4_1_1.png",
-      20
+      20,
+      new Date('2019-01-01'),
+      new Date('2019-12-31')
     ),
     new Place(
       "p3",
       "busan",
       "busan place",
       "https://www.blockmedia.co.kr/wp-content/uploads/2019/04/%EB%B6%80%EC%82%B0%EC%8B%9C.jpg",
-      20
+      20,
+      new Date('2019-01-01'),
+      new Date('2019-12-31')
     )
   ];
 
