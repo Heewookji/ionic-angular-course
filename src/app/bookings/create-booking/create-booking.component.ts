@@ -11,7 +11,7 @@ import { NgForm } from "@angular/forms";
 export class CreateBookingComponent implements OnInit {
   @Input() selectedPlace: Place;
   @Input() selectedMode: string;
-  @ViewChild("f") form: NgForm;
+  @ViewChild("f",null) form: NgForm;
 
   startDate: string;
   endDate: string;
@@ -63,7 +63,6 @@ export class CreateBookingComponent implements OnInit {
   datesValid() {
     const startDate = new Date(this.form.value["date-from"]);
     const endDate = new Date(this.form.value["date-to"]);
-
     return endDate > startDate;
   }
 }
