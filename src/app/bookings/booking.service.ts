@@ -1,21 +1,69 @@
-import { Booking } from './booking.model';
-import { Injectable } from '@angular/core';
+import { Booking } from "./booking.model";
+import { Injectable } from "@angular/core";
+import { BehaviorSubject } from "rxjs";
+import { AuthService } from "../auth/auth.service";
+import { take, delay, map } from "rxjs/operators";
+import { tap } from "rxjs/operators";
 
+@Injectable({ providedIn: "root" })
+export class BookingService {
+    
+  private _bookings = new BehaviorSubject<Booking[]>([]);
 
-@Injectable({providedIn: 'root'})
-export class BookingService{
+  constructor(private authService: AuthService) {}
 
-    private _bookings: Booking[] = [
-        {
-            id: 'xyz',
-            placeId: 'p1',
-            placeTitle: 'Seoul',
-            guestNumber: 2,
-            userId: 'abc'
-    }
-];
+  get bookings() {
+    return this._bookings.asObservable();
+  }
 
-    get bookings(){
-        return [...this._bookings];
-    }
+  getBooking(id: string) {
+    return this.bookings.pipe(
+      take(1),
+      map(bookings => {
+        return { ...bookings.find(b => b.id == id) };
+      })
+    );
+  }
+
+  cancelBooking(id: string) {
+    this._bookings.pipe(
+      take(1),
+      tap(bookings => {
+        const removeIndex = bookings.findIndex(b => b.id == id);
+          this._bookings.next(bookings.slice(removeIndex, removeIndex+1));
+      })
+    );
+  }
+
+  addBooking(
+    placeId: string,
+    placeTitle: string,
+    placeImage: string,
+    firstName: string,
+    lastName: string,
+    guestNumber: number,
+    dateFrom: Date,
+    dateTo: Date
+  ) {
+    const newBooking = new Booking(
+      Math.random().toString(),
+      placeId,
+      this.authService.userId,
+      placeTitle,
+      placeImage,
+      firstName,
+      lastName,
+      guestNumber,
+      dateFrom,
+      dateTo
+    );
+
+    return this.bookings.pipe(
+      take(1),
+      delay(1000),
+      tap(bookings => {
+        this._bookings.next(bookings.concat(newBooking));
+      })
+    );
+  }
 }

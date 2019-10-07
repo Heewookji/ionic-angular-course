@@ -1,11 +1,17 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
-import { NavController, ModalController, ActionSheetController } from "@ionic/angular";
+import {
+  NavController,
+  ModalController,
+  ActionSheetController,
+  LoadingController
+} from "@ionic/angular";
 import { PlacesService } from "../../places.service";
 import { ActivatedRoute } from "@angular/router";
 import { Place } from "../../place.model";
 import { CreateBookingComponent } from "../../../bookings/create-booking/create-booking.component";
-import { TestBed } from '@angular/core/testing';
-import { Subscription } from 'rxjs';
+import { TestBed } from "@angular/core/testing";
+import { Subscription } from "rxjs";
+import { BookingService } from "../../../bookings/booking.service";
 
 @Component({
   selector: "app-place-detail",
@@ -13,7 +19,6 @@ import { Subscription } from 'rxjs';
   styleUrls: ["./place-detail.page.scss"]
 })
 export class PlaceDetailPage implements OnInit, OnDestroy {
-  
   place: Place;
   private placeSub: Subscription;
 
@@ -23,6 +28,8 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
     private placesService: PlacesService,
     private modalCtrl: ModalController,
     private actionSheetCtrl: ActionSheetController,
+    private bookingService: BookingService,
+    private loadingController: LoadingController
   ) {}
 
   ngOnInit() {
@@ -31,14 +38,14 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
         this.navCtrl.navigateBack("/places/tabs/discover");
         return;
       }
-      this.placesService.getPlace(paramMap.get("placeId")).subscribe( place => {
+      this.placesService.getPlace(paramMap.get("placeId")).subscribe(place => {
         this.place = place;
       });
     });
   }
 
-  ngOnDestroy(){
-    if(this.placeSub){
+  ngOnDestroy() {
+    if (this.placeSub) {
       this.placeSub.unsubscribe();
     }
   }
@@ -47,46 +54,71 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
     // this.router.navigateByUrl('/places/tabs/discover');
     // this.navCtrl.navigateBack("/places/tabs/discover");
     // this.navCtrl.pop();
-    this.actionSheetCtrl.create({
-      header: 'Choose an Action!',
-      buttons: [
-        {
-          text: 'Select Date',
-          handler: ()=>{
-            this.openBookingModal('select');
+    this.actionSheetCtrl
+      .create({
+        header: "Choose an Action!",
+        buttons: [
+          {
+            text: "Select Date",
+            handler: () => {
+              this.openBookingModal("select");
+            }
+          },
+          {
+            text: "Random Date",
+            handler: () => {
+              this.openBookingModal("random");
+            }
+          },
+          {
+            text: "Cancel",
+            role: "cancel"
           }
-        },
-        {
-          text: 'Random Date',
-          handler: ()=>{
-            this.openBookingModal('random');
-          }
-        },
-        {
-          text: 'Cancel',
-          role: 'cancel'
-        }
-      ]
-    }).then(actionSheetEl => {
-      actionSheetEl.present();
-    })
-   
+        ]
+      })
+      .then(actionSheetEl => {
+        actionSheetEl.present();
+      });
   }
 
-  openBookingModal(mode: 'select' | 'random'){
+  openBookingModal(mode: "select" | "random") {
     console.log(mode);
     this.modalCtrl
-    .create({
-      component: CreateBookingComponent,
-      componentProps: { selectedPlace: this.place, selectedMode: mode }
-    })
-    .then(modalEl => {
-      modalEl.present();
-      return modalEl.onDidDismiss()
-    }).then(resultData =>{
-      console.log(resultData.data, resultData.role);
-      if(resultData.role == 'confirm')
-      console.log('Booked!');
-    })
+      .create({
+        component: CreateBookingComponent,
+        componentProps: { selectedPlace: this.place, selectedMode: mode }
+      })
+      .then(modalEl => {
+        modalEl.present();
+        return modalEl.onDidDismiss();
+      })
+      .then(resultData => {
+        if (resultData.role == "confirm") {
+          this.loadingController
+            .create({
+              message: "Creating booking..."
+            })
+            .then(loadingEl => {
+
+              loadingEl.present();
+              const data = resultData.data.bookingData;
+
+              this.bookingService
+                .addBooking(
+                  this.place.id,
+                  this.place.title,
+                  this.place.imageUrl,
+                  data.firstName,
+                  data.lastName,
+                  data.guestNumber,
+                  data.startDate,
+                  data.endDate
+                )
+                .subscribe(() => {
+                  loadingEl.dismiss();
+                });
+            });
+        }
+      });
   }
 }
