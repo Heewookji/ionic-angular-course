@@ -26,11 +26,11 @@ export class BookingService {
   }
 
   cancelBooking(id: string) {
-    this._bookings.pipe(
+    return this._bookings.pipe(
       take(1),
+      delay(1000),
       tap(bookings => {
-        const removeIndex = bookings.findIndex(b => b.id == id);
-          this._bookings.next(bookings.slice(removeIndex, removeIndex+1));
+        this._bookings.next(bookings.filter(b => b.id != id));
       })
     );
   }

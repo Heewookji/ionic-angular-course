@@ -38,7 +38,7 @@ export class PlacesService {
       20,
       new Date("2019-01-01"),
       new Date("2019-12-31"),
-      "abc"
+      "abc1"
     )
   ]);
 
