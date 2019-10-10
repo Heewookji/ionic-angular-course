@@ -87,14 +87,12 @@ export class PlacesService {
       this.authService.userId
     );
     return this.http
-      .post("https://ionic-project-fa922.firebaseio.com/offered-places.json", {
+      .post<{name: string}>("https://ionic-project-fa922.firebaseio.com/offered-places.json", {
         ...newPlace,
         id: null
       })
       .pipe(
-        tap(resData => {
-          console.log(resData);
-        })
+       
       );
 
     // return this.places.pipe(
