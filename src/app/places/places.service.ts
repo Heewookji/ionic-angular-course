@@ -4,6 +4,7 @@ import { AuthService } from "../auth/auth.service";
 import { Router } from "@angular/router";
 import { BehaviorSubject } from "rxjs";
 import { take, map, tap, delay } from "rxjs/operators";
+import { HttpClient } from "@angular/common/http";
 
 @Injectable({
   providedIn: "root"
@@ -85,13 +86,24 @@ export class PlacesService {
       dateTo,
       this.authService.userId
     );
-    return this.places.pipe(
-      take(1),
-      delay(1000),
-      tap(places => {
-        this._places.next(places.concat(newPlace));
+    return this.http
+      .post("https://ionic-project-fa922.firebaseio.com/offered-places.json", {
+        ...newPlace,
+        id: null
       })
-    );
+      .pipe(
+        tap(resData => {
+          console.log(resData);
+        })
+      );
+
+    // return this.places.pipe(
+    //   take(1),
+    //   delay(1000),
+    //   tap(places => {
+    //     this._places.next(places.concat(newPlace));
+    //   })
+    // );
   }
 
   updatePlace(placeId: string, title: string, description: string) {
@@ -113,15 +125,10 @@ export class PlacesService {
           oldPlace.availableTo,
           oldPlace.userId
         );
-
         this._places.next(updatedPlaces);
       })
     );
-    this.getPlace(placeId).subscribe(place => {
-      place.title = title;
-      place.description = description;
-    });
   }
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private http: HttpClient) {}
 }
