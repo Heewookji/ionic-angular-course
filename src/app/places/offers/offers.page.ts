@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { PlacesService } from '../places.service';
-import { IonItemSliding } from '@ionic/angular';
+import { IonItemSliding, LoadingController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { Place } from '../place.model';
 import { Subscription } from 'rxjs';
@@ -14,14 +14,22 @@ export class OffersPage implements OnInit, OnDestroy {
  
 
   loadedOffers: Place[];
-  private placesSub: Subscription 
+  private placesSub: Subscription ;
+  isLoading = false;
 
-  constructor(private placesService: PlacesService, private router: Router) { }
+  constructor(private placesService: PlacesService, private router: Router, private loadingCtrl : LoadingController) { }
 
   ngOnInit() {
     this.placesService.offers.subscribe(places =>{
       this.loadedOffers = places;
     })
+  }
+
+  ionViewWillEnter(){
+    this.isLoading = true;
+      this.placesService.fetchPlaces().subscribe(()=> {
+        this.isLoading = false;
+      });
   }
 
   ngOnDestroy(){
