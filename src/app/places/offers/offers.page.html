@@ -26,7 +26,7 @@
           </ion-button>
         </div>
         <ion-list *ngIf="!isLoading && loadedOffers.length > 0">
-          <ion-item-sliding *ngFor="let offer of loadedOffers.slice(1)" #slidingItem>
+          <ion-item-sliding *ngFor="let offer of loadedOffers" #slidingItem>
             <app-offer-item [offer]="offer"></app-offer-item>
             <ion-item-options>
               <ion-item-option color="secondary" (click)="onEdit( offer.id, slidingItem )">

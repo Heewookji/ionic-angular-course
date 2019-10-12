@@ -6,7 +6,6 @@ import { BehaviorSubject } from "rxjs";
 import { take, map, tap, delay, switchMap } from "rxjs/operators";
 import { HttpClient } from "@angular/common/http";
 
-
 // new Place(
 //   "p1",
 //   "seoul",
@@ -37,7 +36,6 @@ import { HttpClient } from "@angular/common/http";
 //   new Date("2019-12-31"),
 //   "abc1"
 // )
-
 
 interface PlaceData {
   availableFrom: string;
@@ -85,7 +83,7 @@ export class PlacesService {
           }
           return places;
         }),
-        tap( places => {
+        tap(places => {
           this._places.next(places);
         })
       );
@@ -154,12 +152,12 @@ export class PlacesService {
   }
 
   updatePlace(placeId: string, title: string, description: string) {
+    let updatedPlaces: Place[];
     return this.places.pipe(
       take(1),
-      delay(1000),
-      tap(places => {
+      switchMap(places => {
         const updatedPlaceIndex = places.findIndex(pl => pl.id == placeId);
-        const updatedPlaces = [...places];
+        updatedPlaces = [...places];
         const oldPlace = updatedPlaces[updatedPlaceIndex];
 
         updatedPlaces[updatedPlaceIndex] = new Place(
@@ -172,6 +170,12 @@ export class PlacesService {
           oldPlace.availableTo,
           oldPlace.userId
         );
+        return this.http.put(
+          `https://ionic-project-fa922.firebaseio.com/offered-places/${placeId}.json`,
+          { ...updatedPlaces[updatedPlaceIndex], id: null }
+        );
+      }),
+      tap(() => {
         this._places.next(updatedPlaces);
       })
     );
