@@ -9,7 +9,6 @@ import { PlacesService } from "../../places.service";
 import { ActivatedRoute } from "@angular/router";
 import { Place } from "../../place.model";
 import { CreateBookingComponent } from "../../../bookings/create-booking/create-booking.component";
-import { TestBed } from "@angular/core/testing";
 import { Subscription } from "rxjs";
 import { BookingService } from "../../../bookings/booking.service";
 import { AuthService } from '../../../auth/auth.service';
@@ -36,7 +35,6 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    console.log(1);
     this.route.paramMap.subscribe(paramMap => {
       if (!paramMap.has("placeId")) {
         this.navCtrl.navigateBack("/places/tabs/discover");

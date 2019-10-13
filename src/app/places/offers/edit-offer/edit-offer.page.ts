@@ -14,6 +14,8 @@ import { Subscription } from "rxjs";
 export class EditOfferPage implements OnInit, OnDestroy {
   offer: Offer;
   form: FormGroup;
+  placeId: string;
+  isLoading = false;
   private offerSub: Subscription;
 
   constructor(
@@ -30,6 +32,8 @@ export class EditOfferPage implements OnInit, OnDestroy {
         this.navController.navigateBack("/places/tabs/offers/");
         return;
       }
+      this.placeId = paramMap.get('placeId');
+      this.isLoading = true;
       this.offerSub = this.placesService
         .getOffer(paramMap.get("placeId"))
         .subscribe(offer => {
@@ -44,6 +48,7 @@ export class EditOfferPage implements OnInit, OnDestroy {
               validators: [Validators.required, Validators.maxLength(180)]
             })
           });
+          this.isLoading = false;
         });
     });
   }
