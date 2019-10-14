@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
-import { NavController } from "@ionic/angular";
+import { NavController, AlertController } from "@ionic/angular";
 import { ActivatedRoute } from "@angular/router";
 import { PlacesService } from "../../places.service";
 import { Offer } from "../offer.model";
@@ -15,22 +15,24 @@ export class OfferBookingPage implements OnInit, OnDestroy {
   private offerSub: Subscription;
 
   constructor(
-    private route: ActivatedRoute,
+    private router: ActivatedRoute,
     private navCtrl: NavController,
-    private placesService: PlacesService
+    private placesService: PlacesService,
   ) {}
 
   ngOnInit() {
-    this.route.paramMap.subscribe(paramMap => {
+    this.router.paramMap.subscribe(paramMap => {
       if (!paramMap.has("placeId")) {
         this.navCtrl.navigateBack("/places/tabs/offers");
         return;
       }
       this.offerSub = this.placesService
-        .getOffer(paramMap.get("placeId"))
-        .subscribe(offer => {
-          this.offer = offer;
-        });
+        .getPlace(paramMap.get("placeId"))
+        .subscribe(
+          offer => {
+            this.offer = offer;
+          }
+        );
     });
   }
 

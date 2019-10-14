@@ -1,9 +1,8 @@
 import { Injectable } from "@angular/core";
 import { Place } from "./place.model";
 import { AuthService } from "../auth/auth.service";
-import { Router } from "@angular/router";
-import { BehaviorSubject } from "rxjs";
-import { take, map, tap, delay, switchMap } from "rxjs/operators";
+import { BehaviorSubject, of } from "rxjs";
+import { take, map, tap, switchMap } from "rxjs/operators";
 import { HttpClient } from "@angular/common/http";
 
 // new Place(
@@ -93,14 +92,6 @@ export class PlacesService {
     return this._places.asObservable();
   }
 
-  getOffer(id: string) {
-    return this.places.pipe(
-      take(1),
-      map(places => {
-        return { ...places.find(p => p.id == id) };
-      })
-    );
-  }
 
   getPlace(id: string) {
     return this.http
@@ -167,6 +158,13 @@ export class PlacesService {
     let updatedPlaces: Place[];
     return this.places.pipe(
       take(1),
+      switchMap(places => {
+        if(!places || places.length <= 0){
+          return this.fetchPlaces();
+        } else{
+          return of(places);
+        }
+      }),
       switchMap(places => {
         const updatedPlaceIndex = places.findIndex(pl => pl.id == placeId);
         updatedPlaces = [...places];
