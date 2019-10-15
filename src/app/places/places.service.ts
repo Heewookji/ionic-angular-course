@@ -52,9 +52,6 @@ interface PlaceData {
 export class PlacesService {
   private _places = new BehaviorSubject<Place[]>([]);
 
-  get places() {
-    return this._places.asObservable();
-  }
 
   fetchPlaces() {
     return this.http
@@ -86,6 +83,10 @@ export class PlacesService {
           this._places.next(places);
         })
       );
+  }
+
+  get places() {
+    return this._places.asObservable();
   }
 
   get offers() {

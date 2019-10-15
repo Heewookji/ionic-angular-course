@@ -41,6 +41,11 @@ export class CreateBookingComponent implements OnInit {
     this.modalCtrl.dismiss(null, "cancel");
   }
 
+  checkValid(){
+    console.log(this.datesValid(), this.form.valid);
+
+  }
+
   onBookPlace() {
     if (!this.form.valid || !this.datesValid()) {
       return;
@@ -63,6 +68,6 @@ export class CreateBookingComponent implements OnInit {
   datesValid() {
     const startDate = new Date(this.form.value["date-from"]);
     const endDate = new Date(this.form.value["date-to"]);
-    return endDate > startDate;
+    return endDate >= startDate;
   }
 }
