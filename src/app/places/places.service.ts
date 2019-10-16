@@ -46,12 +46,14 @@ interface PlaceData {
   userId: string;
 }
 
+
 @Injectable({
   providedIn: "root"
 })
 export class PlacesService {
   private _places = new BehaviorSubject<Place[]>([]);
-
+  
+  constructor(private authService: AuthService, private http: HttpClient) {}
 
   fetchPlaces() {
     return this.http
@@ -192,5 +194,5 @@ export class PlacesService {
     );
   }
 
-  constructor(private authService: AuthService, private http: HttpClient) {}
+  
 }

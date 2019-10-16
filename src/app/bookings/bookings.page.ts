@@ -20,6 +20,11 @@ export class BookingsPage implements OnInit, OnDestroy {
       this.loadedBookings = bookings;
     });
   }
+
+  ionViewWillEnter(){
+    this.bookingService.fetchBookings().subscribe( bookings => {
+    })
+  }
   
   ngOnDestroy(){
     if(this.bookingSub){
