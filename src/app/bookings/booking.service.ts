@@ -2,10 +2,9 @@ import { Booking } from "./booking.model";
 import { Injectable } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
 import { AuthService } from "../auth/auth.service";
-import { take, delay, map, switchMap } from "rxjs/operators";
+import { take, map, switchMap } from "rxjs/operators";
 import { tap } from "rxjs/operators";
 import { HttpClient } from "@angular/common/http";
-import { stringify } from "querystring";
 
 interface BookingData {
   userId: string;
@@ -32,13 +31,15 @@ export class BookingService {
   fetchBookings() {
     return this.http
       .get<{ [key: string]: BookingData }>(
-        "https://ionic-project-fa922.firebaseio.com/bookings.json"
+        `https://ionic-project-fa922.firebaseio.com/bookings.json?orderBy="userId"&equalTo="${this.authService.userId}"`
       )
       .pipe(
         map(resData => {
           const bookings = [];
           for (const key in resData) {
-            if (resData.hasOwnProperty(key)) {
+            if (
+              resData.hasOwnProperty(key)
+            ) {
               bookings.push(
                 new Booking(
                   key,
@@ -73,10 +74,14 @@ export class BookingService {
   }
 
   cancelBooking(id: string) {
-    return this._bookings.pipe(
+    return this.http.delete(
+      `https://ionic-project-fa922.firebaseio.com/bookings/${id}.json`
+    ).pipe(
+      switchMap(()=> {
+        return this.bookings;
+      }),
       take(1),
-      delay(1000),
-      tap(bookings => {
+      tap( bookings => {
         this._bookings.next(bookings.filter(b => b.id != id));
       })
     );
