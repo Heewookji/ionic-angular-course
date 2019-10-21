@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, EventEmitter, Output } from "@angular/core";
 import { ModalController } from "@ionic/angular";
 import { MapModalComponent } from "../../map-modal/map-modal.component";
 import { HttpClient } from "@angular/common/http";
@@ -13,6 +13,12 @@ import { of } from 'rxjs';
   styleUrls: ["./location-picker.component.scss"]
 })
 export class LocationPickerComponent implements OnInit {
+
+  //PlaceLocation을 담은 이벤트를 html에서 쓸수 있도록 넘겨준다.
+  @Output() locationPick = new EventEmitter<PlaceLocation>();
+  selectedLocationImage: string;
+  isLoading = false;
+
   constructor(private modalCtrl: ModalController, private http: HttpClient) {}
 
   ngOnInit() {}
@@ -21,6 +27,7 @@ export class LocationPickerComponent implements OnInit {
     this.modalCtrl.create({ component: MapModalComponent }).then(modalEl => {
       modalEl.present();
       modalEl.onDidDismiss().then(modalData => {
+
         if (!modalData.data) {
           return;
         }
@@ -31,6 +38,9 @@ export class LocationPickerComponent implements OnInit {
           address: null,
           staticMapImageUrl: null
         };
+
+        this.isLoading = true;
+        
         //observable을 받는 경우에는 subscribe를 해야 실제로 요청이 이루어진다.
         this.getAddress(modalData.data.lat, modalData.data.lng).pipe(
           switchMap(address => {
@@ -40,7 +50,9 @@ export class LocationPickerComponent implements OnInit {
           })
         ).subscribe(staticMapImageUrl => {
           pickedLocation.staticMapImageUrl = staticMapImageUrl;
-          console.log(pickedLocation.staticMapImageUrl);
+          this.selectedLocationImage = staticMapImageUrl;
+          this.isLoading = false;
+          this.locationPick.emit(pickedLocation);
         });
       });
     });

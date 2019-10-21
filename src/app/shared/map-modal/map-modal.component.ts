@@ -4,7 +4,8 @@ import {
   AfterViewInit,
   ElementRef,
   ViewChild,
-  Renderer2
+  Renderer2,
+  OnDestroy
 } from "@angular/core";
 import { ModalController } from "@ionic/angular";
 import { environment } from '../../../environments/environment';
@@ -14,8 +15,10 @@ import { environment } from '../../../environments/environment';
   templateUrl: "./map-modal.component.html",
   styleUrls: ["./map-modal.component.scss"]
 })
-export class MapModalComponent implements OnInit, AfterViewInit {
+export class MapModalComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild("map", null) mapElementRef: ElementRef;
+  clickListener: any;
+  googleMaps: any;
 
   constructor(
     private modalCtrl: ModalController,
@@ -24,11 +27,18 @@ export class MapModalComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {}
 
+  ngOnDestroy(){
+    this.googleMaps.event.removeListener(this.clickListener);
+  }
+
   //view 단이 출력 된 뒤 수행하는 메서드
   ngAfterViewInit() {
     //then에서 여러 메서드를 주는 구글맵 객체를 받는다.
     this.getGoogleMaps()
       .then(googleMaps => {
+
+        this.googleMaps = googleMaps;
+
         //맵을 출력하고 싶은 앨리먼트 설정
         const mapEl = this.mapElementRef.nativeElement;
         const map = new googleMaps.Map(mapEl, {
@@ -36,11 +46,11 @@ export class MapModalComponent implements OnInit, AfterViewInit {
           zoom: 16
         });
         //출력이 끝난 뒤에 visible 클래스를 추가해준다.
-        googleMaps.event.addListenerOnce(map, "idle", () => {
+        this.googleMaps.event.addListenerOnce(map, "idle", () => {
           this.renderer.addClass(mapEl, "visible");
         });
         //맵 클릭시 위치 반환하는 이벤트 리스너를 등록한다.
-        map.addListener("click", event => {
+        this.clickListener = map.addListener("click", event => {
           const selectedCoords = {
             lat: event.latLng.lat(),
             lng: event.latLng.lng()
