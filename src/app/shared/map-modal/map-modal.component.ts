@@ -5,10 +5,11 @@ import {
   ElementRef,
   ViewChild,
   Renderer2,
-  OnDestroy
+  OnDestroy,
+  Input
 } from "@angular/core";
 import { ModalController } from "@ionic/angular";
-import { environment } from '../../../environments/environment';
+import { environment } from "../../../environments/environment";
 
 @Component({
   selector: "app-map-modal",
@@ -17,6 +18,10 @@ import { environment } from '../../../environments/environment';
 })
 export class MapModalComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild("map", null) mapElementRef: ElementRef;
+  @Input() center = { lat: -34.397, lng: 150.644 };
+  @Input() selectable = true;
+  @Input() closeButtonText = "Cancel";
+  @Input() title = "Pick Location";
   clickListener: any;
   googleMaps: any;
 
@@ -27,8 +32,10 @@ export class MapModalComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit() {}
 
-  ngOnDestroy(){
-    this.googleMaps.event.removeListener(this.clickListener);
+  ngOnDestroy() {
+    if(this.clickListener){
+      this.googleMaps.event.removeListener(this.clickListener);
+    }
   }
 
   //view 단이 출력 된 뒤 수행하는 메서드
@@ -36,27 +43,37 @@ export class MapModalComponent implements OnInit, AfterViewInit, OnDestroy {
     //then에서 여러 메서드를 주는 구글맵 객체를 받는다.
     this.getGoogleMaps()
       .then(googleMaps => {
-
         this.googleMaps = googleMaps;
 
         //맵을 출력하고 싶은 앨리먼트 설정
         const mapEl = this.mapElementRef.nativeElement;
         const map = new googleMaps.Map(mapEl, {
-          center: { lat: -34.397, lng: 150.644 },
+          center: this.center,
           zoom: 16
         });
         //출력이 끝난 뒤에 visible 클래스를 추가해준다.
         this.googleMaps.event.addListenerOnce(map, "idle", () => {
           this.renderer.addClass(mapEl, "visible");
         });
-        //맵 클릭시 위치 반환하는 이벤트 리스너를 등록한다.
-        this.clickListener = map.addListener("click", event => {
-          const selectedCoords = {
-            lat: event.latLng.lat(),
-            lng: event.latLng.lng()
-          };
-          this.modalCtrl.dismiss(selectedCoords);
-        });
+
+        //맵 클릭시 위치 반환하는 이벤트 리스너를 등록한다.(selectable이 참일 경우에만)
+        if (this.selectable) {
+          this.clickListener = map.addListener("click", event => {
+            const selectedCoords = {
+              lat: event.latLng.lat(),
+              lng: event.latLng.lng()
+            };
+            this.modalCtrl.dismiss(selectedCoords);
+          });
+        //preview로 열었을 때는, 마커를 추가한다.
+        } else{
+          const marker = new googleMaps.Marker({
+            position: this.center,
+            map: map,
+            title: 'Picked Location'
+          });
+          marker.setMap(map);
+        }
       })
       .catch(err => {
         console.log(err);
@@ -77,7 +94,8 @@ export class MapModalComponent implements OnInit, AfterViewInit, OnDestroy {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
       script.src =
-        "https://maps.googleapis.com/maps/api/js?key="+environment.googleMapsAPIKey;
+        "https://maps.googleapis.com/maps/api/js?key=" +
+        environment.googleMapsAPIKey;
       script.async = true;
       script.defer = true;
       document.body.appendChild(script);
