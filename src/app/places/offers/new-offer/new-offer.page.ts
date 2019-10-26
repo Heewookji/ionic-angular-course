@@ -3,7 +3,7 @@ import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { PlacesService } from "../../places.service";
 import { Router } from "@angular/router";
 import { LoadingController } from "@ionic/angular";
-import { PlaceLocation } from '../../location.model';
+import { PlaceLocation } from "../../location.model";
 
 @Component({
   selector: "app-new-offer",
@@ -41,12 +41,17 @@ export class NewOfferPage implements OnInit {
         updateOn: "blur",
         validators: [Validators.required]
       }),
-      location: new FormControl(null, { validators: [Validators.required] })
+      location: new FormControl(null, { validators: [Validators.required] }),
+      image: new FormControl(null, { validators: [Validators.required] })
     });
   }
-//PlaceLocation을 받아서 폼에 업데이트한다.
-  onLocationPicked(location: PlaceLocation){
-    this.form.patchValue({location: location});
+  //PlaceLocation을 받아서 폼에 업데이트한다.
+  onLocationPicked(location: PlaceLocation) {
+    this.form.patchValue({ location: location });
+  }
+  //Image를 받아서 폼에 업데이트한다.
+  onImagePicked(imageData: string) {
+    this.form.patchValue({ image: imageData });
   }
 
   onCreateOffer() {

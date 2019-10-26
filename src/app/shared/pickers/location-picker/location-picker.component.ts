@@ -120,6 +120,8 @@ export class LocationPickerComponent implements OnInit {
       });
   }
 
+
+  //직접 선택하는 맵 모달을 여는 메서드
   private openMap() {
     this.modalCtrl.create({ component: MapModalComponent }).then(modalEl => {
  
