@@ -3,7 +3,9 @@ import {
   OnInit,
   Output,
   ViewChild,
-  ElementRef
+  ElementRef,
+  Input,
+  OnDestroy
 } from "@angular/core";
 import {
   Plugins,
@@ -13,6 +15,7 @@ import {
 } from "@capacitor/core";
 import { EventEmitter } from "@angular/core";
 import { Platform } from "@ionic/angular";
+
 
 @Component({
   selector: "app-image-picker",
@@ -27,7 +30,10 @@ export class ImagePickerComponent implements OnInit {
   //new-offer.html에 있는 (imagePick)과 연결된 이벤트 객체
   @Output() imagePick = new EventEmitter<string | File>();
   selectedImage: string;
+  //기기에 따라 파일선택기를 킬 것인지
   usePicker = false;
+  //미리보기가 남아있는 문제를 위해, 선택했을 경우에만 보이도록
+  @Input() showPreview = false;
 
   constructor(private platform: Platform) {}
 
@@ -41,8 +47,8 @@ export class ImagePickerComponent implements OnInit {
   }
 
   onPickImage() {
-    if (!Capacitor.isPluginAvailable("Camera") || this.usePicker) {
-      //카메라 사용 불가한 경우 파일 선택을 위해 클릭하여 이벤트를 발생시킨다.
+    if (!Capacitor.isPluginAvailable("Camera")) {
+      //카메라 사용 불가한 경우 파일 선택을 위해 클릭하여 파일 선택 이벤트를 발생시킨다.
       this.filePickerRef.nativeElement.click();
       return;
     }
@@ -63,6 +69,10 @@ export class ImagePickerComponent implements OnInit {
       })
       .catch(error => {
         console.log(error);
+
+        if(this.usePicker){
+          this.filePickerRef.nativeElement.click();
+        }
         return false;
       });
   }

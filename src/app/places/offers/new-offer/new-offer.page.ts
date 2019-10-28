@@ -97,7 +97,6 @@ export class NewOfferPage implements OnInit {
       return;
     }
 
-    console.log(this.form.value);
     this.loadingCtrl
       .create({
         message: "Creating Places..."

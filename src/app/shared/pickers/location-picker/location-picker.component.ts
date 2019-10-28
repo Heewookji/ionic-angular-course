@@ -1,4 +1,4 @@
-import { Component, OnInit, EventEmitter, Output } from "@angular/core";
+import { Component, OnInit, EventEmitter, Output, Input } from "@angular/core";
 import {
   ModalController,
   ActionSheetController,
@@ -22,6 +22,8 @@ export class LocationPickerComponent implements OnInit {
   @Output() locationPick = new EventEmitter<PlaceLocation>();
   selectedLocationImage: string;
   isLoading = false;
+  //미리보기가 남아있는 문제를 위해, 선택했을 경우에만 보이도록
+  @Input() showPreview = false;
 
   constructor(
     private modalCtrl: ModalController,
@@ -32,29 +34,30 @@ export class LocationPickerComponent implements OnInit {
 
   ngOnInit() {}
 
-
   //action sheet 실행
   onPickLocation() {
-    this.actionSheetCtrl.create({
-      header: "Please Choose",
-      buttons: [
-        {
-          text: "Auto-Locate",
-          handler: () => {
-            this.locateUser();
-          }
-        },
-        {
-          text: "Pick on Map",
-          handler: () => {
-            this.openMap();
-          }
-        },
-        { text: "Cancel", role: "cancel" }
-      ]
-    }).then(actionEl => {
-      actionEl.present();
-    });
+    this.actionSheetCtrl
+      .create({
+        header: "Please Choose",
+        buttons: [
+          {
+            text: "Auto-Locate",
+            handler: () => {
+              this.locateUser();
+            }
+          },
+          {
+            text: "Pick on Map",
+            handler: () => {
+              this.openMap();
+            }
+          },
+          { text: "Cancel", role: "cancel" }
+        ]
+      })
+      .then(actionEl => {
+        actionEl.present();
+      });
   }
 
   //geolocation 기능을 이용해 현재 위치 기반으로 PlaceLocation 생성
@@ -65,8 +68,11 @@ export class LocationPickerComponent implements OnInit {
     }
     this.isLoading = true;
     Plugins.Geolocation.getCurrentPosition()
-      .then( geoPosition => {
-        const coordinates: Coordinates = {lat:geoPosition.coords.latitude, lng: geoPosition.coords.longitude};
+      .then(geoPosition => {
+        const coordinates: Coordinates = {
+          lat: geoPosition.coords.latitude,
+          lng: geoPosition.coords.longitude
+        };
         this.createPlace(coordinates.lat, coordinates.lng);
         this.isLoading = false;
       })
@@ -82,17 +88,15 @@ export class LocationPickerComponent implements OnInit {
       .create({
         header: "Could not fetch location",
         message: "Please use the map to pick a location!",
-        buttons: ['Okay']
+        buttons: ["Okay"]
       })
       .then(alertEl => {
         alertEl.present();
       });
   }
 
-
   //lat lng를 전달받아 PlaceLocation을 만든다.
-  private createPlace(lat: number, lng: number){
-
+  private createPlace(lat: number, lng: number) {
     const pickedLocation: PlaceLocation = {
       lat: lat,
       lng: lng,
@@ -120,11 +124,9 @@ export class LocationPickerComponent implements OnInit {
       });
   }
 
-
   //직접 선택하는 맵 모달을 여는 메서드
   private openMap() {
     this.modalCtrl.create({ component: MapModalComponent }).then(modalEl => {
- 
       modalEl.onDidDismiss().then(modalData => {
         if (!modalData.data) {
           return;
@@ -132,7 +134,7 @@ export class LocationPickerComponent implements OnInit {
         const coordinates: Coordinates = {
           lat: modalData.data.lat,
           lng: modalData.data.lng
-        }
+        };
         this.createPlace(coordinates.lat, coordinates.lng);
       });
       modalEl.present();
