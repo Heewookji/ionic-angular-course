@@ -5,6 +5,24 @@ import { Router } from "@angular/router";
 import { LoadingController } from "@ionic/angular";
 import { PlaceLocation } from "../../location.model";
 
+const base64toBlob = (b64Data, contentType='', sliceSize=512) => {
+  const byteCharacters = atob(b64Data);
+  const byteArrays = [];
+  
+  for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+    const slice = byteCharacters.slice(offset, offset + sliceSize);
+    
+    const byteNumbers = new Array(slice.length);
+    for (let i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    byteArrays.push(byteArray);
+  }
+  const blob = new Blob(byteArrays, {type: contentType});
+  return blob;
+}
+
 @Component({
   selector: "app-new-offer",
   templateUrl: "./new-offer.page.html",
@@ -42,7 +60,7 @@ export class NewOfferPage implements OnInit {
         validators: [Validators.required]
       }),
       location: new FormControl(null, { validators: [Validators.required] }),
-      image: new FormControl(null, { validators: [Validators.required] })
+      image: new FormControl(null)
     });
   }
   //PlaceLocation을 받아서 폼에 업데이트한다.
@@ -50,14 +68,36 @@ export class NewOfferPage implements OnInit {
     this.form.patchValue({ location: location });
   }
   //Image를 받아서 폼에 업데이트한다.
-  onImagePicked(imageData: string) {
-    this.form.patchValue({ image: imageData });
+  onImagePicked(imageData: string | File) {
+    
+    let imageFile;
+    //넘어온 데이터가 base64일 경우 파일로 만들어준다.
+    if (typeof imageData == "string") {
+      try {
+        imageFile = base64toBlob(
+          imageData.replace("data:image/jpeg;base64,", ""),
+          "image/jpeg"
+        );
+      } catch (error) {
+        console.log(error);
+        return;
+      }
+    //넘어온 데이터가 파일일 경우 그냥 쓴다.
+    } else {
+      imageFile = imageData;
+    }
+
+    this.form.patchValue({image: imageFile });
   }
 
+
+  //폼 적합성을 따지고, 새 장소를 만든다.
   onCreateOffer() {
-    if (!this.form.valid) {
+    if (!this.form.valid || !this.form.get('image').value) {
       return;
     }
+
+    console.log(this.form.value);
     this.loadingCtrl
       .create({
         message: "Creating Places..."

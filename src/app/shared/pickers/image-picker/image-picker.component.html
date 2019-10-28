@@ -2,6 +2,9 @@
   <ion-img class="image" (click)="onPickImage()" [src]="selectedImage" *ngIf="selectedImage"></ion-img>
   <ion-button color="primary" (click)="onPickImage()" *ngIf="!selectedImage">
     <ion-icon slot="start" name="camera"></ion-icon>
-    <ion-label>Pick image</ion-label>
+    <ion-label>Take Picture</ion-label>
   </ion-button>
 </div>
+
+<!-- jpeg 파일만 받을 수 있도록 한다. -->
+<input type="file" accept="image/jpeg" *ngIf="usePicker" #filePicker (change)="onFileChosen($event)"/>
