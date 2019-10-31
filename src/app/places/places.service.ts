@@ -121,13 +121,22 @@ export class PlacesService {
       );
   }
 
+  uploadImage(image:File){
+    const uploadData = new FormData();
+    uploadData.append('image', image);
+
+    return this.http.post<{imageUrl: string, imagePath: string}>('https://us-central1-ionic-project-fa922.cloudfunctions.net/storeImage', 
+    uploadData);
+  }
+
   addPlace(
     title: string,
     description: string,
     price: number,
     dateFrom: Date,
     dateTo: Date,
-    location: PlaceLocation
+    location: PlaceLocation,
+    imageUrl: string
   ) {
     let generatedId: string;
 
@@ -135,7 +144,7 @@ export class PlacesService {
       Math.random().toString(),
       title,
       description,
-      "https://www.jetstar.com/_/media/inspiration-hub/article-images/19apr/south-korea-best-of-seoul-by-subway/seoulherocrop.jpg?rev=9c1de2b0c9294d71a43d01a7118360bd&w=1050&rc=1&cw=1050&ch=590&cx=55&cy=0&hash=D4FF57A7F356187D34BF3E524904D495F3454ED0",
+      imageUrl,
       price,
       dateFrom,
       dateTo,
