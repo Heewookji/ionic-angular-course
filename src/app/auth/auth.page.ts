@@ -4,6 +4,8 @@ import { Router } from "@angular/router";
 import { LoadingController } from "@ionic/angular";
 import { NgForm } from "@angular/forms";
 
+
+
 @Component({
   selector: "app-auth",
   templateUrl: "./auth.page.html",
@@ -42,9 +44,12 @@ export class AuthPage implements OnInit {
     }
     const email = form.value.email;
     const password = form.value.password;
-    console.log(email, password);
     if (this.isLogin) {
+
     } else {
+      this.authService.signup(email, password).subscribe(resData => {
+        console.log(resData);
+      });
     }
   }
 

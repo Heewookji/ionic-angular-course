@@ -5,7 +5,8 @@
 export const environment = {
   //개발용
   production: false,
-  googleMapsAPIKey: 'AIzaSyC3eIkzmwVRwekcE_U9I-ddI0VADJy7bJ0'
+  googleMapsAPIKey: 'AIzaSyC3eIkzmwVRwekcE_U9I-ddI0VADJy7bJ0',
+  firebaseAPIKey: 'AIzaSyDdNzOypadqrKchgcGtiBZ19gEaCCijRvM'
 };
 
 
