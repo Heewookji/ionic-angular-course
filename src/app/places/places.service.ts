@@ -139,19 +139,23 @@ export class PlacesService {
     imageUrl: string
   ) {
     let generatedId: string;
-
-    const newPlace = new Place(
-      Math.random().toString(),
-      title,
-      description,
-      imageUrl,
-      price,
-      dateFrom,
-      dateTo,
-      this.authService.userId,
-      location
-    );
-    return this.http
+    let newPlace: Place;
+    return this.authService.userId.pipe(take(1), switchMap(userId => {
+      if(!userId){
+        throw new Error('No user found');
+      }
+      const newPlace = new Place(
+        Math.random().toString(),
+        title,
+        description,
+        imageUrl,
+        price,
+        dateFrom,
+        dateTo,
+        userId,
+        location
+      );
+      return this.http
       .post<{ name: string }>(
         "https://ionic-project-fa922.firebaseio.com/offered-places.json",
         {
@@ -159,8 +163,7 @@ export class PlacesService {
           id: null
         }
       )
-      .pipe(
-        switchMap(resData => {
+    }), switchMap(resData => {
           generatedId = resData.name;
           return this.places;
         }),
