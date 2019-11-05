@@ -29,12 +29,16 @@ export class BookingService {
   }
 
   fetchBookings() {
-    return this.http
-      .get<{ [key: string]: BookingData }>(
-        `https://ionic-project-fa922.firebaseio.com/bookings.json?orderBy="userId"&equalTo="${this.authService.userId}"`
-      )
+    return this.authService.userId
       .pipe(
-        map(resData => {
+        switchMap(userId => {
+          if(!userId){
+            throw new Error('User not found!');
+          }
+          return this.http.get<{ [key: string]: BookingData }>(
+            `https://ionic-project-fa922.firebaseio.com/bookings.json?orderBy="userId"&equalTo="${userId}"`
+          );
+        }), map(resData => {
           const bookings = [];
           for (const key in resData) {
             if (resData.hasOwnProperty(key)) {
@@ -101,7 +105,7 @@ export class BookingService {
       take(1),
       switchMap(userId => {
         if (!userId) {
-          throw new Error('No user id found!');
+          throw new Error("No user id found!");
         }
         newBooking = new Booking(
           Math.random().toString(),

@@ -144,7 +144,7 @@ export class PlacesService {
       if(!userId){
         throw new Error('No user found');
       }
-      const newPlace = new Place(
+      newPlace = new Place(
         Math.random().toString(),
         title,
         description,
