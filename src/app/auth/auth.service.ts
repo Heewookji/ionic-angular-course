@@ -152,4 +152,5 @@ export class AuthService {
     });
     Plugins.Storage.set({ key: "authData", value: data });
   }
+  //test for commit 
 }
