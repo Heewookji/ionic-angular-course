@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, OnDestroy } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { environment } from "../../environments/environment";
 import { BehaviorSubject, from } from "rxjs";
@@ -19,8 +19,9 @@ export interface AuthResponseData {
 @Injectable({
   providedIn: "root"
 })
-export class AuthService {
-  private _user = new BehaviorSubject<User>(null);
+export class AuthService implements OnDestroy{
+   _user = new BehaviorSubject<User>(null);
+  private activeLogoutTimer: any;
 
   //토큰을 돌려받는다면 토큰이 존재하며, 유효기간 또한 맞으므로 true 리턴
   get userIsAuthenticated() {
@@ -78,6 +79,7 @@ export class AuthService {
       }), tap(user => {
         if(user){
           this._user.next(user);
+          this.autoLogout(user.tokenDuration);
         }
       }),
       map(user => {
@@ -116,14 +118,14 @@ export class AuthService {
     const expirationTime = new Date(
       new Date().getTime() + +userData.expiresIn * 1000
     );
-    this._user.next(
-      new User(
-        userData.localId,
-        userData.email,
-        userData.idToken,
-        expirationTime
-      )
+    const user =   new User(
+      userData.localId,
+      userData.email,
+      userData.idToken,
+      expirationTime
     );
+    this._user.next(user);
+    this.autoLogout(user.tokenDuration);
     this.storeAuthData(
       userData.localId,
       userData.idToken,
@@ -133,7 +135,31 @@ export class AuthService {
   }
 
   logOut() {
+     //기존 타이머를 초기화한다.
+     if( this.activeLogoutTimer){
+      clearTimeout(this.activeLogoutTimer);
+    }
     this._user.next(null);
+    Plugins.Storage.remove({key: 'authData'});
+  }
+
+  //자동 로그아웃 설정
+  private autoLogout(duration: number){
+    //기존 타이머를 초기화한다.
+    if( this.activeLogoutTimer){
+      clearTimeout(this.activeLogoutTimer);
+    }
+    //타이머를 설정한다.
+    this.activeLogoutTimer = setTimeout(() => {
+      this.logOut();
+    },duration);
+  }
+
+  ngOnDestroy(){
+    //기존 타이머를 초기화한다.
+    if(this.activeLogoutTimer){
+      clearTimeout(this.activeLogoutTimer);
+    }
   }
 
   //스토리지에 유저와 토큰 정보를 저장한다.
@@ -152,5 +178,4 @@ export class AuthService {
     });
     Plugins.Storage.set({ key: "authData", value: data });
   }
-  //test for commit 
 }

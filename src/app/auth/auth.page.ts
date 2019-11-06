@@ -23,6 +23,7 @@ export class AuthPage implements OnInit {
 
   ngOnInit() {}
 
+
   //로그인과 사인업을 수행한다.
   authenticate(email: string, password: string) {
     this.isLoading = true;
@@ -70,6 +71,7 @@ export class AuthPage implements OnInit {
     const password = form.value.password;
 
     this.authenticate(email, password);
+    form.reset();
   }
 
   onSwitchAuthMode() {
