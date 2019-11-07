@@ -4,7 +4,7 @@ import { AuthService } from "../auth/auth.service";
 import { BehaviorSubject, of } from "rxjs";
 import { take, map, tap, switchMap } from "rxjs/operators";
 import { HttpClient } from "@angular/common/http";
-import { PlaceLocation } from './location.model';
+import { PlaceLocation } from "./location.model";
 
 // new Place(
 //   "p1",
@@ -45,49 +45,50 @@ interface PlaceData {
   price: number;
   title: string;
   userId: string;
-  location: PlaceLocation
+  location: PlaceLocation;
 }
-
 
 @Injectable({
   providedIn: "root"
 })
 export class PlacesService {
   private _places = new BehaviorSubject<Place[]>([]);
-  
+
   constructor(private authService: AuthService, private http: HttpClient) {}
 
+  //auth토큰을 붙여서 get요청을 보낸다
   fetchPlaces() {
-    return this.http
-      .get<{ [key: string]: PlaceData }>(
-        "https://ionic-project-fa922.firebaseio.com/offered-places.json"
-      )
-      .pipe(
-        map(resData => {
-          const places = [];
-          for (const key in resData) {
-            if (resData.hasOwnProperty(key)) {
-              places.push(
-                new Place(
-                  key,
-                  resData[key].title,
-                  resData[key].description,
-                  resData[key].imageUrl,
-                  resData[key].price,
-                  new Date(resData[key].availableFrom),
-                  new Date(resData[key].availableTo),
-                  resData[key].userId,
-                  resData[key].location
-                )
-              );
-            }
+    return this.authService.token.pipe(
+      switchMap(token => {
+        return this.http.get<{ [key: string]: PlaceData }>(
+          `https://ionic-project-fa922.firebaseio.com/offered-places.json?auth=${token}`
+        );
+      }),
+      map(resData => {
+        const places = [];
+        for (const key in resData) {
+          if (resData.hasOwnProperty(key)) {
+            places.push(
+              new Place(
+                key,
+                resData[key].title,
+                resData[key].description,
+                resData[key].imageUrl,
+                resData[key].price,
+                new Date(resData[key].availableFrom),
+                new Date(resData[key].availableTo),
+                resData[key].userId,
+                resData[key].location
+              )
+            );
           }
-          return places;
-        }),
-        tap(places => {
-          this._places.next(places);
-        })
-      );
+        }
+        return places;
+      }),
+      tap(places => {
+        this._places.next(places);
+      })
+    );
   }
 
   get places() {
@@ -98,7 +99,6 @@ export class PlacesService {
     return this._places.asObservable();
   }
 
-
   getPlace(id: string) {
     return this.http
       .get<PlaceData>(
@@ -106,27 +106,29 @@ export class PlacesService {
       )
       .pipe(
         map(placeData => {
-            return new Place(
-              id,
-              placeData.title,
-              placeData.description,
-              placeData.imageUrl,
-              placeData.price,
-              new Date(placeData.availableFrom),
-              new Date(placeData.availableTo),
-              placeData.userId,
-              placeData.location
-            );
+          return new Place(
+            id,
+            placeData.title,
+            placeData.description,
+            placeData.imageUrl,
+            placeData.price,
+            new Date(placeData.availableFrom),
+            new Date(placeData.availableTo),
+            placeData.userId,
+            placeData.location
+          );
         })
       );
   }
 
-  uploadImage(image:File){
+  uploadImage(image: File) {
     const uploadData = new FormData();
-    uploadData.append('image', image);
+    uploadData.append("image", image);
 
-    return this.http.post<{imageUrl: string, imagePath: string}>('https://us-central1-ionic-project-fa922.cloudfunctions.net/storeImage', 
-    uploadData);
+    return this.http.post<{ imageUrl: string; imagePath: string }>(
+      "https://us-central1-ionic-project-fa922.cloudfunctions.net/storeImage",
+      uploadData
+    );
   }
 
   addPlace(
@@ -140,39 +142,41 @@ export class PlacesService {
   ) {
     let generatedId: string;
     let newPlace: Place;
-    return this.authService.userId.pipe(take(1), switchMap(userId => {
-      if(!userId){
-        throw new Error('No user found');
-      }
-      newPlace = new Place(
-        Math.random().toString(),
-        title,
-        description,
-        imageUrl,
-        price,
-        dateFrom,
-        dateTo,
-        userId,
-        location
-      );
-      return this.http
-      .post<{ name: string }>(
-        "https://ionic-project-fa922.firebaseio.com/offered-places.json",
-        {
-          ...newPlace,
-          id: null
+    return this.authService.userId.pipe(
+      take(1),
+      switchMap(userId => {
+        if (!userId) {
+          throw new Error("No user found");
         }
-      )
-    }), switchMap(resData => {
-          generatedId = resData.name;
-          return this.places;
-        }),
-        take(1),
-        tap(places => {
-          newPlace.id = generatedId;
-          this._places.next(places.concat(newPlace));
-        })
-      );
+        newPlace = new Place(
+          Math.random().toString(),
+          title,
+          description,
+          imageUrl,
+          price,
+          dateFrom,
+          dateTo,
+          userId,
+          location
+        );
+        return this.http.post<{ name: string }>(
+          "https://ionic-project-fa922.firebaseio.com/offered-places.json",
+          {
+            ...newPlace,
+            id: null
+          }
+        );
+      }),
+      switchMap(resData => {
+        generatedId = resData.name;
+        return this.places;
+      }),
+      take(1),
+      tap(places => {
+        newPlace.id = generatedId;
+        this._places.next(places.concat(newPlace));
+      })
+    );
   }
 
   updatePlace(placeId: string, title: string, description: string) {
@@ -180,9 +184,9 @@ export class PlacesService {
     return this.places.pipe(
       take(1),
       switchMap(places => {
-        if(!places || places.length <= 0){
+        if (!places || places.length <= 0) {
           return this.fetchPlaces();
-        } else{
+        } else {
           return of(places);
         }
       }),
@@ -212,6 +216,4 @@ export class PlacesService {
       })
     );
   }
-
-  
 }

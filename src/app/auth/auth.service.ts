@@ -48,6 +48,18 @@ export class AuthService implements OnDestroy{
     );
   }
 
+  get token(){
+    return this._user.asObservable().pipe(
+      map(user => {
+        if (user) {
+          return user.token;
+        } else {
+          return null;
+        }
+      })
+    );
+  }
+
   constructor(private http: HttpClient) {}
 
   //스토리지에서 토큰을 찾아내, 적정하다면 유저를 갱신한 뒤, 참을 반환한다.

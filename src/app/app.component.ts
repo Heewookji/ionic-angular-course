@@ -19,7 +19,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   constructor(
     private platform: Platform,
-    private authService: AuthService,
+    private authService: AuthService, 
     private router: Router
   ) {
     this.initializeApp();
@@ -37,6 +37,8 @@ export class AppComponent implements OnInit, OnDestroy {
     this.authService.logOut();
   }
   
+
+  //url이 새로 나와도 자동 로그인을 가능하게 하는 구문. _user를 지켜보고 있다가 상태가 바뀌면 /auth로 돌려보낸다.
   ngOnInit() {
     this.authSub = this.authService.userIsAuthenticated.subscribe(isAuth => {
 
