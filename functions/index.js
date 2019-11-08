@@ -20,7 +20,7 @@ exports.storeImage = functions.https.onRequest((req, res) => {
     if (req.method !== 'POST') {
       return res.status(500).json({ message: 'Not allowed.' });
     }
-
+    //헤더에 보낸 토큰을 검증한다.
     if(!req.headers.authorization || !req.headers.authorization.startsWith('Bearer ')){
       return res.status(401).json({ error: 'Unauthorized!'});
     }

@@ -59,6 +59,7 @@ export class PlacesService {
   //auth토큰을 붙여서 get요청을 보낸다
   fetchPlaces() {
     return this.authService.token.pipe(
+      take(1),
       switchMap(token => {
         return this.http.get<{ [key: string]: PlaceData }>(
           `https://ionic-project-fa922.firebaseio.com/offered-places.json?auth=${token}`
@@ -99,36 +100,44 @@ export class PlacesService {
     return this._places.asObservable();
   }
 
+  //auth 토큰을 붙여 get 요청
   getPlace(id: string) {
-    return this.http
-      .get<PlaceData>(
-        `https://ionic-project-fa922.firebaseio.com/offered-places/${id}.json`
-      )
-      .pipe(
-        map(placeData => {
-          return new Place(
-            id,
-            placeData.title,
-            placeData.description,
-            placeData.imageUrl,
-            placeData.price,
-            new Date(placeData.availableFrom),
-            new Date(placeData.availableTo),
-            placeData.userId,
-            placeData.location
-          );
-        })
-      );
+    return this.authService.token.pipe(
+      take(1),
+      switchMap(token => {
+        return this.http.get<PlaceData>(
+          `https://ionic-project-fa922.firebaseio.com/offered-places/${id}.json?auth=${token}`
+        );
+      }),
+      map(placeData => {
+        return new Place(
+          id,
+          placeData.title,
+          placeData.description,
+          placeData.imageUrl,
+          placeData.price,
+          new Date(placeData.availableFrom),
+          new Date(placeData.availableTo),
+          placeData.userId,
+          placeData.location
+        );
+      })
+    );
   }
 
+  //cloud function에 정의한대로 auth 토큰을 헤더에 보낸다.
   uploadImage(image: File) {
     const uploadData = new FormData();
     uploadData.append("image", image);
 
-    return this.http.post<{ imageUrl: string; imagePath: string }>(
-      "https://us-central1-ionic-project-fa922.cloudfunctions.net/storeImage",
-      uploadData
-    );
+    return this.authService.token.pipe(
+      take(1),
+      switchMap(token => {
+      return this.http.post<{ imageUrl: string; imagePath: string }>(
+        "https://us-central1-ionic-project-fa922.cloudfunctions.net/storeImage",
+        uploadData, {headers: {Authorization: 'Bearer ' + token}}
+      );
+    }))
   }
 
   addPlace(
@@ -141,11 +150,18 @@ export class PlacesService {
     imageUrl: string
   ) {
     let generatedId: string;
+    let fetchedUserId: string;
     let newPlace: Place;
     return this.authService.userId.pipe(
       take(1),
       switchMap(userId => {
-        if (!userId) {
+        fetchedUserId = userId;
+        return this.authService.token;
+      }),
+      //하나의 토큰만 받는다.
+      take(1),
+      switchMap(token => {
+        if (!fetchedUserId) {
           throw new Error("No user found");
         }
         newPlace = new Place(
@@ -156,11 +172,11 @@ export class PlacesService {
           price,
           dateFrom,
           dateTo,
-          userId,
+          fetchedUserId,
           location
         );
         return this.http.post<{ name: string }>(
-          "https://ionic-project-fa922.firebaseio.com/offered-places.json",
+          `https://ionic-project-fa922.firebaseio.com/offered-places.json?auth=${token}`,
           {
             ...newPlace,
             id: null
@@ -181,7 +197,12 @@ export class PlacesService {
 
   updatePlace(placeId: string, title: string, description: string) {
     let updatedPlaces: Place[];
-    return this.places.pipe(
+    let fetchedToken: string;
+    return this.authService.token.pipe(take(1),
+    switchMap(token => {
+      fetchedToken = token;
+      return this.places;
+    }),
       take(1),
       switchMap(places => {
         if (!places || places.length <= 0) {
@@ -207,7 +228,7 @@ export class PlacesService {
           oldPlace.location
         );
         return this.http.put(
-          `https://ionic-project-fa922.firebaseio.com/offered-places/${placeId}.json`,
+          `https://ionic-project-fa922.firebaseio.com/offered-places/${placeId}.json?auth=${fetchedToken}`,
           { ...updatedPlaces[updatedPlaceIndex], id: null }
         );
       }),
