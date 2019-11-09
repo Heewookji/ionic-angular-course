@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">ionic-angular-course</string>
-    <string name="title_activity_main">ionic-angular-course</string>
-    <string name="package_name">com.udemyCourse.ionicAngular</string>
-    <string name="fileprovider_authority">com.udemyCourse.ionicAngular.fileprovider</string>
-    <string name="custom_url_scheme">com.udemyCourse.ionicAngular</string>
+    <string name="app_name">PairBnB</string>
+    <string name="title_activity_main">PairBnB</string>
+    <string name="package_name">com.udemyheewook.ionicangular</string>
+    <string name="fileprovider_authority">com.udemyheewook.ionicangular.fileprovider</string>
+    <string name="custom_url_scheme">com.udemyheewook.ionicangular</string>
 </resources>
